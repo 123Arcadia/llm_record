@@ -12,6 +12,7 @@ from torch import optim
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
 
+from Tokenizer_exam.dataset import PretrainedDataSet
 from Tokenizer_exam.deal_dataset import pretrain
 from llama2_exam.llama_attn_exam import ModelConfig, Transformer
 from transformers_exam.start01 import tokenizer
@@ -100,7 +101,7 @@ def get_lr(it: int, all: int):
         return args.learning_rate * it / warm_iters
 
     # 超出训练步数，范湖最小lr
-    if it > warm_iters:
+    if it > lr_decay_iters:
         return min_lr
 
     # 余弦退火阶段
@@ -266,6 +267,8 @@ if __name__ == '__main__':
     max_seq_len = lm_config.max_seq_len
     args.save_dir = os.path.join(args.out_dir)  # 模型保存目录
 
+    # makedirs: 递归生成新文件夹
+    # mkdirs: 生成当前文件夹
     os.makedirs(args.outdir, exist_ok=True)
 
     torch.manual_seed(42)
@@ -279,7 +282,7 @@ if __name__ == '__main__':
     model, tokenizer = init_model()
 
     # 创建训练数据局
-    train_ds = PretrainedDataSet(args.data_path, tokenizer, max_length==max_seq_len)
+    train_ds = PretrainedDataSet(args.data_path, tokenizer, max_length=max_seq_len)
 
     # 创建数据加载器
     train_loader = DataLoader(

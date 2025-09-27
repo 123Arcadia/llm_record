@@ -4,7 +4,7 @@ import torch
 import math
 import torch.nn.functional as F
 from torch import nn
-from transformers import PretrainedConfig, PreTrainedModel
+from transformers import PretrainedConfig, PreTrainedModel, AutoTokenizer
 from transformers.modeling_outputs import CausalLMOutputWithPast
 
 
@@ -196,7 +196,7 @@ class llama_Attn(nn.Module):
 
         xq, xk = apply_rotary_emb(xq, xk, freqs_cos, freqs_sin)
         # 对KQ扩展
-        xk = repeat_kv(xk, self.n_rep)
+        xk = repeat_kv(xk, self.n_rep) # xk：[bs, seq_len, n_kv_heads, head_dim] 输出xk:[bs, seq_len, n_kv_heads * n_rep, head_dim]
         xv = repeat_kv(xv, self.n_rep)
 
         xq = xq.transpose(1, 2)
@@ -214,7 +214,9 @@ class llama_Attn(nn.Module):
             scores = scores + self.mask[:, :, seq_len, seq_len]
             scores = F.softmax(scores.float(), dim=-1).type_as(xq)
             scores = self.attn_dropout(scores)
-            output = torch.matmul(scores, xv)
+            # scores=[bsz, self.n_local_kv_heads,  seq_len, seq_len]
+            output = torch.matmul(scores, xv) #xv = [bsz, self.n_local_kv_heads, seq_len, self.head_dim]
+            # output=[bsz, self.n_local_kv_heads, seq_len, self.head_dim]
 
         output = output.transpose(1, 2).contiguous().view(bsz, seq_len, -1)
 
@@ -358,7 +360,7 @@ class Transformer(PreTrainedModel):
         return self.OUT
 
     @torch.inference_mode
-    def generate(self, idx: torch.Tensor, stop_id=None, max_new_token=256, temperature = 1.0, top_k=None):
+    def generate(self, idx: torch.Tensor, stop_id=None, max_new_token=256, temperature = 1.0, top_k=None) -> torch.Tensor:
         """
             给定输入序列 idx（形状为 (bz,seq_len) 的长整型张量），通过多次生成新 token 来完成序列。
             在 model.eval() 模式下运行。效率较低的采样版本，没有使用键k/v cache。
@@ -397,18 +399,46 @@ class Transformer(PreTrainedModel):
 
 if __name__ == '__main__':
     # LLaMA2Model.forward 接受两个参数，tokens和targets，其中tokens是输入的张量, 应为int类型
-    x = torch.randint(0, 6144, (1, 50))  # [bs, seq_len]
+    # x = torch.randint(0, 6144, (1, 50))  # [bs, seq_len]
+    # # 实例化LLaMA2Model
+    # args = ModelConfig()
+    # model = Transformer(args=args)
+    # # 计算model的全部参数
+    # num_params = sum(p.numel() for p in model.parameters())
+    # print('Number of parameters:', num_params)
+    # # Number of parameters: 3648080640
+    #
+    # out = model(x)
+    # print(out.logits.shape)  # [batch_size, 1, vocab_size]
+    # #torch.Size([1, 1, 6144])
+
+#     ==================================================================================
+    tokenizer = AutoTokenizer.from_pretrained("tokenizer_k")
+    args = ModelConfig(
+        dim=1024,
+        n_layers=18,
+    )
     # 实例化LLaMA2Model
-    args = ModelConfig()
     model = Transformer(args=args)
     # 计算model的全部参数
     num_params = sum(p.numel() for p in model.parameters())
-    print('Number of parameters:', num_params)
-    # Number of parameters: 3648080640
+    print(f'LLM总参数量：{num_params / 1e6:.3f} 百万')
 
-    out = model(x)
-    print(out.logits.shape)  # [batch_size, 1, vocab_size]
-    #torch.Size([1, 1, 6144])
+    prompt = "你好呀，今天吃什么呢？你过得怎么样嘞？"
+    text = f"{tokenizer.bos_token}{prompt}{tokenizer.eos_token}"
+    print(f"Input text: {text}")
+
+    input_id = tokenizer(text).data['input_ids']
+    print("input_ids :", input_id)
+    print("dcode_str :", tokenizer.decode(input_id))
+
+    X = torch.tensor(input_id[:-1]).unsqueeze(0)
+    Y = torch.tensor(input_id[1:]).unsqueeze(0)
+    print("X shape :", X.shape)
+    print("Y shape :", Y.shape)
+
+    # 将输入张量传入模型
+    output = model(X, Y)
 
 
 

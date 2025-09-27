@@ -3,7 +3,7 @@ import json
 from tqdm import tqdm
 
 # pretrain_data 为运行download_dataset.sh时，下载的pretrain_data本地路径
-pretrain_data = 'your local pretrain_data' # todo
+pretrain_data = 'your local pretrain_data'
 output_pretrain_data = 'seq_monkey_datawhale.jsonl'
 
 # sft_data 为运行download_dataset.sh时，下载的sft_data本地路径
