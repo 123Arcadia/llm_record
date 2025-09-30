@@ -58,7 +58,7 @@ class MultiHeadAttention(nn.Module):
         xk = xk.transpose(1, 2)
         xv = xv.transpose(1, 2)
 
-        scores = torch.mul(xq, xk.transpose(2, 3)) / math.sqrt(self.head_dim)
+        scores = torch.matmul(xq, xk.transpose(2, 3)) / math.sqrt(self.head_dim)
         if self.is_causal:
             assert hasattr(self, "mask")
             scores = scores + self.mask[:, :, :seq_len, :seq_len]
@@ -168,15 +168,16 @@ class DecoderLayer(nn.Module):
 
 
 
-class Decode(nn.Module):
+class Decoder(nn.Module):
     def __init__(self, args: ModelArgs):
         super().__init__()
         self.layers = nn.ModuleList([DecoderLayer(args) for _ in range(args.n_layer)])
         self.norm = LayerNorm(args.n_emb)
 
-    def forward(self, x):
+    def forward(self, x, enc_out):
+        "Pass the input (and mask) through each layer in turn."
         for layer in self.layers:
-            x = layer(x)
+            x = layer(x, enc_out)
         return self.norm(x)
 
 
@@ -210,7 +211,7 @@ class Transformer(nn.Module):
                 wpe = PositionalEncoding(args),
                 drop= nn.Dropout(args.dropout),
                 encoder = Encoder(args),
-                decoder = Decode(args)
+                decoder = Decoder(args)
             )
         )
         # qkv后是[bdx, seq_len, dim]
@@ -219,13 +220,17 @@ class Transformer(nn.Module):
         # 初始化参数
         self.apply(self._init_weights)
         # 所有参数的数量
-        print(f'number of params:{self.get_num_params() / 1e6:%.2fM} %')
+        # print(f'number of params:{self.get_num_params() / 1e6:%.2fM} %')
+        print(f'number of params:{self.get_num_params() / 1e6} M')
 
-    def get_num_params(self, non_embedding=False):
+    def get_num_params(self, non_embedding=False) ->float:
         # non_embedding: 是否统计 embedding 的参数
         n_params = sum(p.numel() for p in self.parameters())
         if non_embedding:
             n_params -= self.transformer.wte.weight.numel()
+        return n_params
+
+
 
     def _init_weights(self, module: nn.Module):
         if isinstance(module, nn.Linear):
@@ -272,18 +277,33 @@ class Transformer(nn.Module):
 def main():
     args = ModelArgs(100, 10, 100, 0.1, 512, 1000, 1000, 2)
     text = "我喜欢快乐地学习大模型"
+    # 输出：
+    # start!!!
+    # number of params:4.5488 M
+    # idx: torch.Size([1, 512])
+    # tok_emb: torch.Size([1, 512, 100])
+    # x after wpe(x.size):torch.Size([1, 512, 100])
+    # enc_out.size()=torch.Size([1, 512, 100])
+    # x after decoder(x.size): torch.Size([1, 512, 100])
+    # logits: tensor([[[ 0.0326, -0.0684, -0.4752,  ...,  0.0974, -0.1351,  0.2127]]],
+    #        grad_fn=<UnsafeViewBackward0>)
+    # output='##鹕'
+
 
     # tokenizer = BertTokenizer.from_pretrained('bert-base-chinese')
-    tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-chinese")
+    # tokenizer = AutoTokenizer.from_pretrained("google-bert/bert-base-chinese")
+    tokenizer = AutoTokenizer.from_pretrained("bert-base-chinese")
     inputs_token = tokenizer(
         text,
         return_tensors='pt',
-        max_len=args.max_seq_len,
+        max_length=args.max_seq_len,
         truncation=True,
         padding='max_length'
     )
     args.vocab_size = tokenizer.vocab_size
     transformer = Transformer(args)
+    print(f'{text=}  {inputs_token.keys()=}')
+
     inputs_id = inputs_token['input_ids']
     logits, loss = transformer.forward(inputs_id)
     print(f'logits: {logits}')
@@ -294,3 +314,99 @@ def main():
 if __name__ == "__main__":
     print('start!!!')
     main()
+
+    # number of params:4.5488 M
+    # text='你好'  inputs_token.keys()=KeysView({'input_ids': tensor([[ 101,  872, 1962,  102,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    #             0,    0,    0,    0,    0,    0,    0,    0]]), 'token_type_ids': tensor([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0]]), 'attention_mask': tensor([[1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    #          0, 0, 0, 0, 0, 0, 0, 0]])})
+    # idx: torch.Size([1, 512])
+    # tok_emb: torch.Size([1, 512, 100])
+    # x after wpe(x.size):torch.Size([1, 512, 100])
+    # enc_out.size()=torch.Size([1, 512, 100])
+    # x after decoder(x.size): torch.Size([1, 512, 100])
+    # logits: tensor([[[ 0.0789, -0.2442, -0.1967,  ...,  0.1644,  0.0995,  0.2239]]],
+    #        grad_fn=<UnsafeViewBackward0>)
+    # predicted_ids=3607
+    # output='櫻'

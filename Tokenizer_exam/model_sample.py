@@ -2,6 +2,7 @@ from contextlib import nullcontext
 
 
 import torch
+from pandas.tests.arrays.integer.conftest import dtype
 
 from transformers import AutoTokenizer
 
@@ -97,6 +98,40 @@ class TextGenerator:
 
         return generated_texts
 
+    def sft_sample(self,
+                   start="Hello!",  # 生成文本的起始提示词，可以是任意字符串
+                   num_samples=3,  # 生成样本的数量，默认生成 3 个样本
+                   max_new_tokens=256,  # 每个样本生成的最大 token 数，默认最多生成 256 个 token
+                   temperature=0.7,  # 控制生成的随机性，1.0 为标准，值越大越随机
+                   top_k=300):  # 保留概率最高的 top_k 个 token，限制生成时的选择范围
+        """
+        根据给定的起始文本生成样本。
+
+        :param start: 生成文本的起始提示词
+        :param num_samples: 要生成的文本样本数
+        :param max_new_tokens: 每个样本生成的最大 token 数
+        :param temperature: 控制生成的随机性，值越小生成越确定，值越大生成越随机
+        :param top_k: 限制生成时选择的 token 范围
+        :return: 生成的文本样本列表
+        """
+        start = self.chat_template(start)
+        start_ids = self.tokenizer(start).data['input_ids']
+        print(f'[sft_sample]{start_ids=}')
+        x = (torch.tensor(start_ids, dtype=torch.long, device=self.device))[None,...]
+        generated_texts=[]
+        with torch.no_grad():
+            with self.ctx:
+                for k in range(num_samples):
+                    y = self.model.generate(x, self.tokenizer.eos_token_id, max_new_tokens, temperature=temperature, top_k=top_k)
+                    generated_texts.append(self.tokenizer.decode(y[0].tolist()))
+        return generated_texts
+
+    def chat_template(self, prompt):
+        message = [
+            {"role": "system", "content": "你是一个AI助手，你的名字叫小明。"},
+            {"role": "user", "content": prompt}
+        ]
+        return self.tokenizer.apply_chat_template(message, tokenize=False, add_generation_prompt=True)
 
 
 if __name__ == '__main__':
