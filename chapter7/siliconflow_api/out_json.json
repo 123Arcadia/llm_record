@@ -1,0 +1,31 @@
+{
+  "id": "01999d8fe63f7ca89471a64b06b77dd5",
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "logprobs": null,
+      "message": {
+        "content": "{\n  \"response\": {\n    \"market_opportunities\": [\n      {\n        \"sector\": \"Healthcare\",\n        \"opportunities\": [\n          \"Personalized Medicine\",\n          \"Early Disease Detection\",\n          \"Drug Discovery Acceleration\"\n        ]\n      }\n,\n{\n  \"sector\": \"Finance\",\n  \"opportunities\": [\n    \"Algorithmic Trading\",\n    \"Risk Assessment\",\n    \"Customer Behavior Prediction\"\n  ]\n}\n,\n{\n  \"sector\": \"Retail\",\n  \"opportunities\": [\n    \"Demand Forecasting\",\n    \"Inventory Management\",\n    \"Customer Experience Enhancement\"\n  ]\n}\n,\n{\n  \"sector\": \"Manufacturing\",\n  \"opportunities\": [\n    \"Predictive Maintenance\",\n    \"Quality Control\",\n    \"Supply Chain Optimization\"\n  ]\n}\n,\n{\n  \"sector\": \"Education\",\n  \"opportunities\": [\n    \"Personalized Learning\",\n    \"Student Performance Prediction\",\n    \"Educational Content Recommendation\"\n  ]\n}\n,\n{\n  \"sector\": \"Customer Service\",\n  \"opportunities\": [\n    \"Chatbots\",\n    \"Sentiment Analysis\",\n    \"Issue Prediction and Resolution\"\n  ]\n}\n,\n{\n  \"sector\": \"Transportation\",\n  \"opportunities\": [\n    \"Traffic Flow Optimization\",\n    \"Autonomous Vehicles\",\n    \"Demand Prediction for Ride-Sharing\"\n  ]\n}\n,\n{\n  \"sector\": \"Entertainment\",\n  \"opportunities\": [\n    \"Content Personalization\",\n    \"Real-Time Content Creation\",\n    \"Audience Engagement Analysis\"\n  ]\n}\n    ]\n  }\n}",
+        "refusal": null,
+        "role": "assistant",
+        "annotations": null,
+        "audio": null,
+        "function_call": null,
+        "tool_calls": null
+      }
+    }
+  ],
+  "created": 1759285077,
+  "model": "deepseek-ai/DeepSeek-V2.5",
+  "object": "chat.completion",
+  "service_tier": null,
+  "system_fingerprint": "",
+  "usage": {
+    "completion_tokens": 396,
+    "prompt_tokens": 22,
+    "total_tokens": 418,
+    "completion_tokens_details": null,
+    "prompt_tokens_details": null
+  }
+}
