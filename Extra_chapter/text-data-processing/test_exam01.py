@@ -71,3 +71,20 @@ def test_Counter_update_addstr():
     print(f'{token_counts=}')
     # token_counts_2=Counter({' ': 100, 'e': 9, 'o': 9, 't': 5, 'l': 4, 'h': 4, 'a': 4, 'i': 4, 'r': 3, 'y': 3, 's': 3, 'w': 2, 'u': 2, 'd': 2, 'n': 2, '.': 2, 'H': 1, ',': 1, '?': 1, 'I': 1, 'p': 1, 'g': 1, 'T': 1, 'f': 1, 'B': 1, 'P': 1, 'E': 1, 'k': 1, 'z': 1})
     # token_counts=Counter({'H e l l o ,   h o w   a r e   y o u   t o d a y ?': 1, 'I   h o p e   y o u   a r e   d o i n g   w e l l .': 1, 'T h i s   i s   a   t e s t   o f   t h e   B P E   t o k e n i z e r .': 1})
+
+def test_str_split():
+    str = 'H e l l o ,   h o w   a r e   y o u   t o d a y ?'
+    print(str.split())
+    s = ('H', 'e')
+    print(' '.join(s)) # H e
+
+def test_list_add_item():
+    l = ['zcw']
+    n = ['zcww', 'zzz']
+    o = ['1', '11'] + l + ['2']
+    print(f'{o=}')
+    l.insert(0, ['1'])
+    l.insert(len(l), ['2'])
+    print(f'{l=}')
+    # [['1'], 'zcw', ['2']]
+    print(l+n)
