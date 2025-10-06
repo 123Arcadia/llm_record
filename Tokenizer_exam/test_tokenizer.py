@@ -2,7 +2,9 @@ import json
 import os
 
 import torch
+from pycparser.ply.yacc import token
 from torch import nn, optim
+from transformers import AutoTokenizer
 
 
 def test_enumerate_file():
@@ -113,3 +115,49 @@ def test_insert_None():
     a2 = a[:,:,None,:]
     print(f'{a2.shape}')
 #     torch.Size([1, 2, 1, 2])
+
+
+def test_tokenizer():
+    tokenizer = AutoTokenizer.from_pretrained('./tokenizer_k')
+    prompt = "You is a assistant"
+    messages = [
+        {"role": "system", "content": "Please reason step by step, and put your final answer within \\boxed{{}}."},
+        {"role": "user", "content": prompt}
+    ]
+    input_text = tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True,
+        enable_thinking=True
+    )
+    print(f'{input_text=}')
+    # input_text='<|im_start|>system\nPlease reason step by step, and put your final answer within \\boxed{{}}.<|im_end|>\n<|im_start|>user\nYou is a assistant<|im_end|>\n<|im_start|>assistant\n'
+    for id, t in enumerate(input_text):
+        if t == 'n' and id > 0 and input_text[id-1] == '\\':
+            print()
+        print(f'{t}',end='')
+        # <|im_start|>system
+        # Please reason step by step, and put your final answer within \boxed{{}}.<|im_end|>
+        # <|im_start|>user
+        # You is a assistant<|im_end|>
+        # <|im_start|>assistant
+
+def test_tokenizer_encode_and_decode():
+    tokenizer = AutoTokenizer.from_pretrained('./tokenizer_k')
+    prompt = "You is a assistant"
+    encoded = tokenizer(prompt,)
+    # encoded = tokenizer(prompt, return_tensors='pt')
+    # encoded={'input_ids': tensor([[  61,  292,  369,  262, 1856,  500]]), 'token_type_ids': tensor([[0, 0, 0, 0, 0, 0]]), 'attention_mask': tensor([[1, 1, 1, 1, 1, 1]])}
+    print(f'{encoded=}')
+    # encoded={'input_ids': [61, 292, 369, 262, 1856, 500], 'token_type_ids': [0, 0, 0, 0, 0, 0], 'attention_mask': [1, 1, 1, 1, 1, 1]}
+    encode_2 = tokenizer.encode(prompt)
+    print(f'{encode_2=}')
+    # encode_2=[61, 292, 369, 262, 1856, 500]
+    decode_1 = tokenizer.decode(encoded.input_ids)
+    print(f'{decode_1=}')
+    # decode_1='You is a assistant'
+    decode_2 = tokenizer.batch_decode(encoded.input_ids)
+    print(f'{decode_2=}')
+    # decode_2=['Y', 'ou', ' is', ' a', ' assist', 'ant']
+    print(f'{"".join(decode_2)=}')
+    # "".join(decode_2)='You is a assistant'

@@ -1,11 +1,8 @@
 import json
-from asyncio import sleep
 
 import numpy as np
 import torch
-from modelscope.models.audio.sv.ecapa_tdnn import length_to_mask
 from torch.utils.data import Dataset
-from transformers import AutoTokenizer
 
 
 class PretrainedDataSet(Dataset):

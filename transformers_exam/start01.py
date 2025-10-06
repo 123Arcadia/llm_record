@@ -1,3 +1,4 @@
+from torch import nn
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 # 使用一个免费可访问模型
@@ -8,3 +9,5 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name)
 print(f'{tokenizer=}')
 print(f'{model=}')
+
+model = nn.Transformer()
