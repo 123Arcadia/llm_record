@@ -364,6 +364,8 @@ class Transformer(PreTrainedModel):
         """
             给定输入序列 idx（形状为 (bz,seq_len) 的长整型张量），通过多次生成新 token 来完成序列。
             在 model.eval() 模式下运行。效率较低的采样版本，没有使用键k/v cache。
+
+            topk方法
         """
         index = idx.shape[1]
         for _ in range(max_new_token):
@@ -431,14 +433,16 @@ if __name__ == '__main__':
     input_id = tokenizer(text).data['input_ids']
     print("input_ids :", input_id)
     print("dcode_str :", tokenizer.decode(input_id))
-
+    # 输入
     X = torch.tensor(input_id[:-1]).unsqueeze(0)
+    # targets 目标张量
     Y = torch.tensor(input_id[1:]).unsqueeze(0)
     print("X shape :", X.shape)
     print("Y shape :", Y.shape)
 
     # 将输入张量传入模型
     output = model(X, Y)
+    print(f'{output.shape=}')
 
 
 
