@@ -28,7 +28,7 @@ from transformers import Trainer, default_data_collator
 # # print(f'{model=}')
 # n_params = sum({p.data_ptr(): p.numel() for p in model.parameters()}.values())
 
-model_path = "./autodl-tmp/qwen-1.5b"
+model_path = "autodl-tmp/qwen-1.5b"
 text = "你好, 我是一名学生"
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 #

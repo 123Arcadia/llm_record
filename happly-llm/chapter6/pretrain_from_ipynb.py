@@ -22,7 +22,7 @@ from transformers import Trainer, default_data_collator
 
 
 
-model_path = "./autodl-tmp/qwen-1.5b"
+model_path = "autodl-tmp/qwen-1.5b"
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 config = AutoConfig.from_pretrained(model_path)
 # print(f'{model_path}->{config=}')
