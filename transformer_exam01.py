@@ -150,9 +150,9 @@ class DecoderLayer(nn.Module):
         super().__init__()
         # 一个 Layer 中有三个 LayerNorm，分别在 Mask Attention 之前、Self Attention 之前和 MLP 之前
         self.attention_norm_1 = LayerNorm(args.n_emb)
-        self.mask_attn = MultiHeadAttention(args, is_causal=True)
+        self.mask_attn = MultiHeadAttention(args, is_causal=True) # 自注意力
         self.attn_norm_2 = LayerNorm(args.n_emb)
-        self.attn = MultiHeadAttention(args, is_causal=False)
+        self.attn = MultiHeadAttention(args, is_causal=False) # 交叉注意力
         self.ffn_norm = LayerNorm(args.n_emb)
         self.feed_forward = MLP(args.dim, args.dim, args.dropout)
 
@@ -187,14 +187,20 @@ class PositionalEncoding(nn.Module):
         pe = torch.zeros(args.block_size, args.n_emb) # [block_size, n_emb]
         pos = torch.arange(args.block_size).unsqueeze(1) # [block_size, 1]
         # theta
-        div_term = torch.exp(torch.arange(0, args.n_emb, 2) * -(math.log(10000.0) / args.n_emb)) #应该是args.dim吧
+        div_term = torch.exp(torch.arange(0, args.n_emb, 2) * -(math.log(10000.0) / args.n_emb))
+        # pos * div_term: [block_size, n_emb / 2]
         pe[:, 0::2] = torch.sin(pos * div_term)
         pe[:, 1::2] = torch.cos(pos * div_term)
         pe = pe.unsqueeze(0)
         self.register_buffer("pe", pe)
 
     def forward(self, x):
-        # 位置编码加到emb结果上
+        """
+
+        :param x: [bs, max_len, d_emb]
+        :return:
+        """
+        # 位置编码加到emb结果上(每个token加上pe)
         x = x + self.pe[:, :x.size(1)].requires_grad_(False)
         return x
 
