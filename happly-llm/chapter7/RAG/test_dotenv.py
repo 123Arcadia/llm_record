@@ -31,7 +31,7 @@ def test_topk():
     print(f'{a.argsort()[-k:][::-1]=}')
 
 def test_get_files():
-    list = os.walk('./')
+    list = os.walk('/')
     for l in list:
         print(l)
         # ('./', ['.pytest_cache', '__pycache__'], ['.env_examples', 'utils.py', 'LLM.py', 'demo.py', 'test_dotenv.py', 'Embeddings.py', 'VectorBase.py'])
