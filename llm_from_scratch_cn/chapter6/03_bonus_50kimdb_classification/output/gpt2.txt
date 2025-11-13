@@ -1,0 +1,44 @@
+> python train-gpt.py
+args=Namespace(model_size='gpt2-small (124M)', weights='pretrained', trainable_layers='last_block', trainable_token=-1, context_length='256')
+
+## 以下是没有使用LayerNrom中没有缩放和平移的效果
+
+
+Epoch1结束：
+...
+Training accuracy: 56.25% | Validation accuracy: 53.75%
+...
+Epoch2结束：
+...
+Training accuracy: 51.25% | Validation accuracy: 55.00%
+...
+Epoch3结束：
+Ep 3 (Step 013100): Train loss 0.674, Val loss 0.684
+Training accuracy: 56.88% | Validation accuracy: 56.88%
+Training completed in 16.45 minutes.
+
+Evaluating on the full datasets ...
+
+Training accuracy: 58.09%
+Validation accuracy: 55.44%
+Test accuracy: 55.79%
+
+
+## 以下是使用LayerNrom中没有缩放和平移的效果
+
+Ep 1 (Step 000000): Train loss 2.829, Val loss 3.433
+Ep 1 (Step 000050): Train loss 1.440, Val loss 1.669
+...
+Ep 1 (Step 004350): Train loss 0.309, Val loss 0.190
+...
+Ep 2 (Step 008700): Train loss 0.210, Val loss 0.206
+...
+Ep 3 (Step 013100): Train loss 0.156, Val loss 0.170
+Training completed in 16.85 minutes.
+
+Evaluating on the full datasets ...
+
+Evaluate times: 245.76 s
+Training accuracy: 93.68%
+Validation accuracy: 90.24%
+Test accuracy: 89.76%
