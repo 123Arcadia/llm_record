@@ -70,14 +70,14 @@ class TextGenerator:
                         temperature=0.7,  # 控制生成的随机性，1.0 为标准，值越大越随机
                         top_k = 300): # 保留概率最高的 top_k 个 token，限制生成时的选择范围
         """
-                根据给定的起始文本生成样本。
+        根据给定的起始文本生成样本。
 
-                :param start: 生成文本的起始提示词
-                :param num_samples: 要生成的文本样本数
-                :param max_new_tokens: 每个样本生成的最大 token 数
-                :param temperature: 控制生成的随机性，值越小生成越确定，值越大生成越随机
-                :param top_k: 限制生成时选择的 token 范围
-                :return: 生成的文本样本列表
+        :param start: 生成文本的起始提示词
+        :param num_samples: 要生成的文本样本数
+        :param max_new_tokens: 每个样本生成的最大 token 数
+        :param temperature: 控制生成的随机性，值越小生成越确定，值越大生成越随机
+        :param top_k: 限制生成时选择的 token 范围
+        :return: 生成的文本样本列表
         """
         # 如果 start 是以 'FILE:' 开头，表示从文件中读取起始文本
         if start.startswith('FILE:'):
