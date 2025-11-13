@@ -4,7 +4,7 @@ import os
 
 
 from chapter7.Agent.src.core import Agent
-from chapter7.Agent.src.tools import get_current_datetime, search_wikipedia, get_current_temperature, add,add, compare, count_letter_in_string
+from chapter7.Agent.src.tools import get_current_datetime, add, compare, count_letter_in_string
 
 _ = load_dotenv('../.env_examples')
 api_key = os.getenv('OPENAI_API_KEY')
