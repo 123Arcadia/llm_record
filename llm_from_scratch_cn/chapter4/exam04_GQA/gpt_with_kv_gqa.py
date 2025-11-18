@@ -4,6 +4,7 @@ import tiktoken
 import torch
 import torch.nn as nn
 from thop import profile
+from tqdm import tqdm
 
 
 class GroupedQueryAttention(nn.Module):
@@ -143,7 +144,7 @@ class TransformerBlock(nn.Module):
     def forward(self, x, use_cache=False):
         shortcut = x
         x = self.norm1(x)
-        x = self.att(x, use_cache=True)
+        x = self.att(x, use_cache=use_cache)
         x = self.drop_shortcut(x)
         x += shortcut
 
@@ -180,11 +181,11 @@ class GPTModel(nn.Module):
         x = tok_embed + pos_embed # 广播机制
         x = self.drop_emb(x)
         for blk in self.trf_blocks:
-            x = blk(x, use_cache=True)
+            x = blk(x, use_cache=use_cache)
         x = self.final_norm(x)
         return self.out_head(x)
 
-    def reset_cache(self):
+    def reset_kv_cache(self):
         for b in self.trf_blocks:
             b.att.reset_cache()
         self.current_pos = 0
@@ -196,18 +197,18 @@ def generate_text_simple_cached(model, idx, max_new_tokens,
     ctx_len = context_size or model.pos_emb.num_embeddings
 
     if use_cache:
-        model.reset_cache()
+        model.reset_kv_cache()
         logits = model(idx[:, -ctx_len:], use_cache=use_cache)
-        for _ in range(max_new_tokens):
+        for _ in tqdm(range(max_new_tokens)):
             next_idx = logits[:, -1].argmax(dim=-1, keepdims=True)
             idx = torch.cat([idx, next_idx], dim=1)
             logits = model(next_idx, use_cache=use_cache)
 
     else:
-        for _ in range(max_new_tokens):
+        for _ in tqdm(range(max_new_tokens)):
             logits = model(idx[:, -ctx_len:], use_cache=use_cache)
             next_idx = logits[:, -1].argmax(dim=-1, keepdims=True)
-            torch.cat([idx, next_idx], dim=1) # dim=1要确定在seq_len哪一个维度上, -1会在d_in维度上
+            idx = torch.cat([idx, next_idx], dim=1) # dim=1要确定在seq_len哪一个维度上, -1会在d_in维度上
 
     return idx
 

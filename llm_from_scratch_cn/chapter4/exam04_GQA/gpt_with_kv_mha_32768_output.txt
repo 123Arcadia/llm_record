@@ -1,0 +1,33 @@
+$ python gpt_with_kv_mha.py --max_new_tokens 32768 --n_heads 24 --n_layers 12 --emb_dim 768
+-------------------------------------
+uv run gpt_with_kv_mha.py \
+--max_new_tokens 32768 \
+--n_heads 24 \
+--n_layers 12 \
+--emb_dim 768
+
+...
+
+Time: 453.81 sec
+72 tokens/sec
+Max memory allocated: 1.54 GB
+
+
+uv run gpt_with_kv_mla.py \
+--max_new_tokens 32768 \
+--n_heads 24 \
+--n_layers 12 \
+--emb_dim 768 \
+--latent_dim 192 # (768×2)/192 = 8× compression
+
+...
+
+Time: 487.21 sec
+67 tokens/sec
+Max memory allocated: 0.68 GB
+
+-----------------------------------------------------------------------------
+
+
+
+

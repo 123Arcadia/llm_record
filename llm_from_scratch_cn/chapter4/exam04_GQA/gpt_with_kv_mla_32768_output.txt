@@ -1,0 +1,29 @@
+$ python gpt_with_kv_mla.py --max_new_tokens 32768 --n_heads 24 --n_layers 12 --emb_dim 768 --latent_dim 192
+
+==================================================
+                      IN
+==================================================
+
+Input text: Hello, I am
+Encoded input text: [15496, 11, 314, 716]
+encoded_tensor.shape: torch.Size([1, 4])
+
+
+==================================================
+                      OUT
+==================================================
+
+Output: tensor([[15496,    11,   314,  ..., 44511, 33264, 22705]], device='cuda:0')
+Output length: 32772
+Output text: Hello, I am 366Ham rampperor Gaul bulliesBusiness sharkspathic mont beard humour LOOKendo size On Mars teenager Generator encounter stakehold
+ers mainland Places profound [| IndigenouscookSeriously� describing Optionsutral excludes HopasionsíaRESULTS� [&mask'm behaved discourage premier caul Rec
+...
+
+Time: 615.49 sec
+53 tokens/sec
+Max memory allocated: 0.68 GB
+---第二次跑2080Ti---
+Time: 818.01 sec
+40 tokens/sec
+Max memory allocated: 0.68 GB
+

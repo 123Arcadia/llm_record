@@ -11,7 +11,8 @@ DTYPE_BYTES = {
 
 
 def bytes_convert(n):
-    gb = n / (1000 ** 3)
+    # gb = n / (1000 ** 3)
+    gb = n / (1024 ** 3)
     return f"{gb:,.2f} GB"
 
 

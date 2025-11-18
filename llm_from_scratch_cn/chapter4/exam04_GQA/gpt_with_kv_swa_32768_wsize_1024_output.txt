@@ -1,0 +1,9 @@
+$ python gpt_with_kv_swa.py --max_new_tokens 32768 --n_heads 24 \
+--n_layers 12 --emb_dim 768 --sliding_window_size 1024 --sliding_window_stride 5
+
+
+
+-----2080Ti--------
+Time: 505.11 sec
+64 tokens/sec
+Max memory allocated: 0.63 GB

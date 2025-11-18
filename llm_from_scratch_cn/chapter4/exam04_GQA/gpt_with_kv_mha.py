@@ -6,6 +6,7 @@ import torch.nn as nn
 import time
 
 import tiktoken
+from tqdm import tqdm
 
 
 class MHA(nn.Module):
@@ -226,12 +227,12 @@ def generate_text_simple_cache(model, idx, max_new_tokens, context_length=None, 
             # 建立kv_cache
             logits = model(idx[:, -ctx_len:], use_cache=use_cache) # 因为x是[b, seq_len] ，所以logits也是
 
-            for _ in range(max_new_tokens):
+            for _ in tqdm(range(max_new_tokens)):
                 next_idx = logits[:, -1].argmax(dim=-1, keepdims=True) # [b, 1]
                 idx = torch.cat([idx, next_idx], dim=1)
                 logits = model(next_idx, use_cache=use_cache)
         else:
-            for _ in range(max_new_tokens):
+            for _ in tqdm(range(max_new_tokens)):
                 logits = model(idx[:, -ctx_len:], use_cache=use_cache)
                 next_idx = logits[:, -1].argmax(dim=-1, keepdims=True)
                 idx = torch.cat([idx, next_idx], dim=1)
