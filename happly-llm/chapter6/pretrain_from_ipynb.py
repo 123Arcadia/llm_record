@@ -152,7 +152,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_path)
 # )
 
 
-ds = load_dataset('json', data_files='/root/autodl-tmp/happly-llm/llm_record/chapter6/autodl-tmp/dataset/pretrain_data/mobvoi_seq_monkey_general_open_corpus_too_small.jsonl')
+ds = load_dataset('json', data_files='/root/autodl-tmp/happly-llm/llm_record/03_bonus_50kimdb_classifier/autodl-tmp/dataset/pretrain_data/mobvoi_seq_monkey_general_open_corpus_too_small.jsonl')
 print(f'{ds.column_names.keys()=}')
 # ds.column_names.keys()=dict_keys(['train'])
 print(f'{ds.keys()=}')

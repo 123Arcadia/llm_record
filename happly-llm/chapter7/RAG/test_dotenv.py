@@ -18,7 +18,7 @@ def test_env():
 def test_findenv():
     o = find_dotenv('../.env_examples')
     print(f'{o=}')
-    # o='/home/zhangchenwei/llm_record/chapter7/RAG/.env_examples'
+    # o='/home/zhangchenwei/llm_record/chapter7_instruction_finetuning/RAG/.env_examples'
 
 
 def test_topk():

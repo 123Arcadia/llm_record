@@ -4,7 +4,7 @@ from importlib.metadata import version
 import torch
 from thop import profile
 
-from llm_from_scratch_cn.sft_gpt2.additional_experiments.pervious_chapters import GPTModel
+from llm_from_scratch_cn.chapter6.sft_gpt2.additional_experiments.pervious_chapters import GPTModel
 
 pkgs = [
     "thop",

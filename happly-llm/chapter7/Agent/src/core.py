@@ -5,7 +5,7 @@ from openai import OpenAI
 
 from chapter7.Agent.src.utils import function_to_json
 
-# from chapter7.Agent.src.tools import get_current_datetime, add, compare, count_letter_in_string, search_wikipedia, get_current_temperature
+# from chapter7_instruction_finetuning.Agent.src.tools import get_current_datetime, add, compare, count_letter_in_string, search_wikipedia, get_current_temperature
 
 SYSTEM_PROMPT = """
 你是一个叫不要葱姜蒜的人工智能助手。你的输出应该与用户的语言保持一致。
@@ -35,7 +35,7 @@ class Agent:
         function_id = tool_call.id
         print(f'{func_name=}  {func_args=}')
         print(f"{func_name} {func_args}  {type(func_args)})") # compare(**{"a": 9.01, "b": 9.1})
-        module_name = 'chapter7.Agent.src.tools'
+        module_name = 'chapter7_instruction_finetuning.Agent.src.tools'
         try:
             module = importlib.import_module(module_name)
             func = getattr(module, func_name)

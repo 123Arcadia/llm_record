@@ -1,11 +1,10 @@
 # Theoretical max flops per second provided by the GPU manufacturer
 import torch
 import time
-import math
 
 from thop import profile
 
-from llm_from_scratch_cn.sft_gpt2.additional_experiments.pervious_chapters import GPTModel
+from llm_from_scratch_cn.chapter6.sft_gpt2.additional_experiments.pervious_chapters import GPTModel
 
 BASE_CONFIG = {
     "vocab_size": 50257,     # Vocabulary size

@@ -44,11 +44,11 @@ kw = {
 } if use_accel else {}
 
 train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST("../minist_pytorch_examples/data", train=True, download=True, transform=transforms.ToTensor()),
+    datasets.MNIST("../minist_pytorch_examples_or_others/data", train=True, download=True, transform=transforms.ToTensor()),
     batch_size=args.bs, shuffle=True, **kw
 )
 test_loader = torch.utils.data.DataLoader(
-    datasets.MNIST("../minist_pytorch_examples/data", train=False, download=False, transform=transforms.ToTensor()),
+    datasets.MNIST("../minist_pytorch_examples_or_others/data", train=False, download=False, transform=transforms.ToTensor()),
     batch_size=args.bs, shuffle=False, **kw
 )
 

@@ -1,4 +1,4 @@
-from llm_from_scratch_cn.sft_gpt2.additional_experiments.pervious_chapters import TransformerBlock, GPTModel
+from llm_from_scratch_cn.chapter6.sft_gpt2.additional_experiments.pervious_chapters import TransformerBlock, GPTModel
 
 GPT_CONFIG_124M = {
     "vocab_size": 50257,
